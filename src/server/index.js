@@ -1,25 +1,14 @@
 const dotenv = require('dotenv');
 dotenv.config();
-
 var path = require('path');
 const express = require('express');
-const mockAPIResponse = require('./mockAPI.js');
 var bodyParser = require('body-parser');
 var cors = require('cors');
-
 // Require aylien npm package
 var aylien = require('aylien_textapi');
+const { text } = require('body-parser');
 
-var textapi = new aylien({
-  application_id: process.env.API_ID,
-  application_key: process.env.API_KEY,
-});
-
-var json = {
-  title: 'test json response',
-  message: 'this is a message',
-  time: 'now',
-};
+let projectData = {};
 
 const app = express();
 app.use(cors());
@@ -34,17 +23,30 @@ app.use(
 
 app.use(express.static('dist'));
 
-console.log(JSON.stringify(mockAPIResponse));
+var textapi = new aylien({
+  application_id: process.env.API_ID,
+  application_key: process.env.API_KEY,
+});
+
+// designates what port the app will listen to for incoming requests
+app.listen(2020, function () {
+  console.log('Example app listening on port 2020!');
+});
 
 app.get('/', function (req, res) {
   res.sendFile('dist/index.html');
 });
 
-app.get('/test', function (req, res) {
-  res.json(mockAPIResponse);
-});
-
-// designates what port the app will listen to for incoming requests
-app.listen(8081, function () {
-  console.log('Example app listening on port 8081!');
+app.post('/test', (req, res) => {
+  console.log(req.body);
+  textapi.sentiment({
+    text: 'John is a very good football player',
+    function(error, response) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log(response);
+      }
+    },
+  });
 });
